@@ -5,6 +5,7 @@ namespace Chumper\Zipper;
 use Chumper\Zipper\Repositories\RepositoryInterface;
 use Exception;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Str;
 
 /**
  * This Zipper class is a wrapper around the ZipArchive methods with some handy functions
@@ -175,12 +176,12 @@ class Zipper
         }
 
         if ($methodFlags & self::EXACT_MATCH) {
-            $matchingMethod = function ($haystack) use ($files) {
-                return in_array($haystack, $files, true);
+            $matchingMethod = function ($needle) use ($files) {
+                return in_array($needle, $files, true);
             };
         } else {
-            $matchingMethod = function ($haystack) use ($files) {
-                return starts_with($haystack, $files);
+            $matchingMethod = function ($needle) use ($files) {
+                return Str::startsWith($needle, $files);
             };
         }
 
@@ -323,7 +324,7 @@ class Zipper
         if (is_array($fileToRemove)) {
             $self = $this;
             $this->repository->each(function ($file) use ($fileToRemove, $self) {
-                if (starts_with($file, $fileToRemove)) {
+                if (Str::startsWith($file, $fileToRemove)) {
                     $self->getRepository()->removeFile($file);
                 }
             });
@@ -593,7 +594,7 @@ class Zipper
         $self = $this;
         $this->repository->each(function ($fileName) use ($path, $matchingMethod, $self) {
             $currentPath = $self->getCurrentFolderWithTrailingSlash();
-            if (!empty($currentPath) && !starts_with($fileName, $currentPath)) {
+            if (!empty($currentPath) && !Str::startsWith($fileName, $currentPath)) {
                 return;
             }
 
